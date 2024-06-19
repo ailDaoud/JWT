@@ -14,20 +14,20 @@ class AuthController extends Controller
 {
     public function login(Request $request)
     {
-        try{
-            $validation=Validator::make($request->all(),[
+        try {
+            $validation = Validator::make($request->all(), [
                 "email" => 'required|email|exists:users',
                 "password" => "string|required|min:6"
             ]);
-            if($validation->fails()){
+            if ($validation->fails()) {
                 return response()->json([
-                  'sucsess'=>0,
-                  'result'=>null,
-                  'message'=>$validation->errors(),
-                ],200);
+                    'sucsess' => 0,
+                    'result' => null,
+                    'message' => $validation->errors(),
+                ], 200);
             }
-            $token=Auth::attempt(['email'=>$request->email,'password'=>$request->password]);
-           /* if(!Auth::attempt($request->only(['email','password']))){
+            $token = Auth::attempt(['email' => $request->email, 'password' => $request->password]);
+            /* if(!Auth::attempt($request->only(['email','password']))){
                 return response()->json([
                     'sucsess'=>0,
                     'result'=>null,
@@ -35,39 +35,33 @@ class AuthController extends Controller
                   ],200);
 
             }*/
-            if(!$token){
+            if (!$token) {
                 return response()->json([
-                    'sucsess'=>0,
-                    'result'=>null,
-                    'message'=>'register first',
-                  ],200);
-
+                    'sucsess' => 0,
+                    'result' => null,
+                    'message' => 'register first',
+                ], 200);
             }
-            $user=User::where('email',$request->email)->first();
+            $user = User::where('email', $request->email)->first();
             return response()->json([
-                'sucsess'=>1,
-                'result'=>$user,
-                'message'=>'register first',
-                'token'=>$token
-              ],200);
-
-
-        }
-        catch(Exception $e){
+                'sucsess' => 1,
+                'user' => $user,
+                'token' => $token
+            ], 200);
+        } catch (Exception $e) {
             return response()->json([
-                'sucsess'=>0,
-                'result'=>null,
-                'message'=>$e,
-              ],200);
+                'sucsess' => 0,
+                'result' => null,
+                'message' => $e,
+            ], 200);
         }
-
     }
 
     public function register(Request $request)
     {
         try {
             $validation = Validator::make($request->all(), [
-                "email" => 'required|email|unique:users,email',
+                "email" => 'required|string|email|unique:users',
                 'name' => 'required|string',
                 "password" => "string|required|min:6"
             ]);
@@ -82,18 +76,13 @@ class AuthController extends Controller
             $user = User::create([
                 'email' => $request->email,
                 'name' => $request->name,
-              //  'password' => Hash::make($request->password),
-                'password' => bcrypt($request->password)
+                'password' => Hash::make($request->password),
+              //  'password' => bcrypt($request->password)
             ]);
-           /* $user->email = $request->email;
-            $user->name = $request->name;
-            $user->password = Hash::make($request->password);
-            $user->save();*/
             return response()->json([
                 'sucsess' => 1,
-                'result' => $user,
-                'message' => 'user created sucsessfully',
-                'token' => $user->createToken("API-TOKEN")->plainTextToken
+                'user' => $user,
+                'message' => 'user created sucsessfully'
             ], 200);
         } catch (Exception $e) {
             return response()->json([
