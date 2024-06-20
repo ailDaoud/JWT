@@ -27,27 +27,20 @@ class AuthController extends Controller
                 ], 200);
             }
             $token = Auth::attempt(['email' => $request->email, 'password' => $request->password]);
-            /* if(!Auth::attempt($request->only(['email','password']))){
-                return response()->json([
-                    'sucsess'=>0,
-                    'result'=>null,
-                    'message'=>'register first',
-                  ],200);
-
-            }*/
             if (!$token) {
                 return response()->json([
                     'sucsess' => 0,
                     'result' => null,
                     'message' => 'register first',
                 ], 200);
+            } else {
+                $user = User::where('email', $request->email)->first();
+                return response()->json([
+                    'sucsess' => 1,
+                    'user' => $user,
+                    'token' => $token
+                ], 200);
             }
-            $user = User::where('email', $request->email)->first();
-            return response()->json([
-                'sucsess' => 1,
-                'user' => $user,
-                'token' => $token
-            ], 200);
         } catch (Exception $e) {
             return response()->json([
                 'sucsess' => 0,
@@ -77,7 +70,7 @@ class AuthController extends Controller
                 'email' => $request->email,
                 'name' => $request->name,
                 'password' => Hash::make($request->password),
-              //  'password' => bcrypt($request->password)
+                //  'password' => bcrypt($request->password)
             ]);
             return response()->json([
                 'sucsess' => 1,
